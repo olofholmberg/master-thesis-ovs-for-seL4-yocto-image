@@ -111,6 +111,8 @@ main(int argc, char *argv[])
 
     daemon_become_new_user(false);
 
+    printf("Starting custom controller...\n");
+
     if (argc - optind < 1) {
         ovs_fatal(0, "at least one vconn argument required; "
                   "use --help for usage");
