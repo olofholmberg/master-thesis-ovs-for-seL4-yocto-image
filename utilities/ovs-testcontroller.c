@@ -111,7 +111,7 @@ void block_event(int fd) {
     /* Blocking read */
     int result = read(fd, &val, sizeof(val));
     if (result < 0) {
-        printf("Error: %s\n", strerror(errno));
+        printf("Error: %s\n", ovs_strerror(errno));
     } 
 
 }
