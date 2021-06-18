@@ -107,17 +107,17 @@ OVS_NO_RETURN static void usage(void);
 /* --- seL4 Helper Functions Start --- */
 
 void block_event(int fd) {
-	int val;
-	/* Blocking read */
-	int result = read(fd, &val, sizeof(val));
-	if (result < 0) {
-	    printf("Error: %s\n", strerror(errno));
-	} 
+    int val;
+    /* Blocking read */
+    int result = read(fd, &val, sizeof(val));
+    if (result < 0) {
+        printf("Error: %s\n", strerror(errno));
+    } 
 
 }
 
 void emit_event(char* emit) {
-	emit[0] = 1;
+    emit[0] = 1;
 }
 
 /* --- seL4 Helper Functions End --- */
