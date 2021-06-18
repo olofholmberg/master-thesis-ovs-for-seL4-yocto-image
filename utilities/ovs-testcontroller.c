@@ -28,7 +28,6 @@
 
 #include <fcntl.h>
 #include <unistd.h>
-#include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -155,9 +154,9 @@ main(int argc, char *argv[])
     char *dataport1_name = "/dev/uio1";
     
     int fd = open(dataport_name, O_RDWR);
-    assert(fd >= 0);
+    ovs_assert(fd >= 0);
     int fd1 = open(dataport1_name, O_RDWR);
-    assert(fd >= 0);
+    ovs_assert(fd >= 0);
     
     void *dataport;
     if ((dataport = mmap(NULL, dataport_length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 1 * getpagesize())) == (void *) -1) {
