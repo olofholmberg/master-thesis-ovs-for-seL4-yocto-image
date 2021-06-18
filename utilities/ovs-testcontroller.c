@@ -24,6 +24,18 @@
 #include <stdio.h>
 #include <string.h>
 
+/* --- seL4 Imports Start --- */
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <assert.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <inttypes.h>
+
+/* --- seL4 Imports End --- */
+
 #include "command-line.h"
 #include "compiler.h"
 #include "daemon.h"
@@ -93,6 +105,24 @@ static void new_switch(struct switch_ *, struct vconn *);
 static void parse_options(int argc, char *argv[]);
 OVS_NO_RETURN static void usage(void);
 
+/* --- seL4 Helper Functions Start --- */
+
+void block_event(int fd) {
+	int val;
+	/* Blocking read */
+	int result = read(fd, &val, sizeof(val));
+	if (result < 0) {
+	    printf("Error: %s\n", strerror(errno));
+	} 
+
+}
+
+void emit_event(char* emit) {
+	emit[0] = 1;
+}
+
+/* --- seL4 Helper Functions End --- */
+
 int
 main(int argc, char *argv[])
 {
@@ -111,8 +141,65 @@ main(int argc, char *argv[])
 
     daemon_become_new_user(false);
     
-    printf("Starting custom controller...\n");
-
+    /* --- seL4 Test Component Interaction --- */
+    
+    printf("Starting custom seL4 integrated controller...\n");
+    
+    char *uio_one_string = "This is a uio1 string\n\0";
+    
+    int dataport_length = 4096;
+    
+    char *dataport_name = "/dev/uio0";
+    char *dataport1_name = "/dev/uio1";
+    
+    int fd = open(dataport_name, O_RDWR);
+    assert(fd >= 0);
+    int fd1 = open(dataport1_name, O_RDWR);
+    assert(fd >= 0);
+    
+    void *dataport;
+    if ((dataport = mmap(NULL, dataport_length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 1 * getpagesize())) == (void *) -1) {
+        printf("mmap dataport0 failed\n");
+        close(fd);
+    }
+    
+    void *dataport1;
+    if ((dataport1 = mmap(NULL, dataport_length, PROT_READ | PROT_WRITE, MAP_SHARED, fd1, 1 * getpagesize())) == (void *) -1) {
+        printf("mmap dataport1 failed\n");
+        close(fd);
+    }
+    
+    char *emit;
+    if ((emit = mmap(NULL, 0x1000, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0 * getpagesize())) == (void *) -1) {
+        printf("mmap emit failed\n");
+        close(fd);
+    }
+    
+    printf("CVC: Reading uio0\n");
+    for (char *chr = dataport; *chr != 0; chr ++) {
+        putchar(*chr);
+    }
+    fflush(stdout);
+    printf("CVC: Writing uio1\n");
+    size_t uio_one = uio_one_string ? strnlen(uio_one_string, 4095) + 1 : 0;
+    strncpy(dataport1, uio_one_string, uio_one);
+    printf("CVC: Reading uio0\n");
+    for (char *chr = dataport; *chr != 0; chr ++) {
+        putchar(*chr);
+    }
+    fflush(stdout);
+    printf("CVC: Emitting uio0\n");
+    emit_event(emit);
+    printf("CVC: Waiting for done_init_emit_underlying in crossvm_init\n");
+    block_event(fd);
+    printf("Finished crossvm test script\n");
+    munmap(dataport, dataport_length);
+    munmap(dataport1, dataport_length);
+    munmap(emit, dataport_length);
+    close(fd);
+    
+    /* --- seL4 Test Component Interaction End --- */
+    
     if (argc - optind < 1) {
         ovs_fatal(0, "at least one vconn argument required; "
                   "use --help for usage");
