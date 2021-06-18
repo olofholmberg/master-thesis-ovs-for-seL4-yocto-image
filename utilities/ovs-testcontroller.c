@@ -28,7 +28,6 @@
 
 #include <fcntl.h>
 #include <unistd.h>
-#include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -140,7 +139,9 @@ main(int argc, char *argv[])
     fatal_ignore_sigpipe();
 
     daemon_become_new_user(false);
-    
+
+    printf("Starting custom controller...\n");
+
     /* --- seL4 Test Component Interaction --- */
     
     printf("Starting custom seL4 integrated controller...\n");
@@ -153,9 +154,9 @@ main(int argc, char *argv[])
     char *dataport1_name = "/dev/uio1";
     
     int fd = open(dataport_name, O_RDWR);
-    assert(fd >= 0);
+    ovs_assert(fd >= 0);
     int fd1 = open(dataport1_name, O_RDWR);
-    assert(fd >= 0);
+    ovs_assert(fd >= 0);
     
     void *dataport;
     if ((dataport = mmap(NULL, dataport_length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 1 * getpagesize())) == (void *) -1) {
@@ -199,7 +200,7 @@ main(int argc, char *argv[])
     close(fd);
     
     /* --- seL4 Test Component Interaction End --- */
-    
+
     if (argc - optind < 1) {
         ovs_fatal(0, "at least one vconn argument required; "
                   "use --help for usage");
