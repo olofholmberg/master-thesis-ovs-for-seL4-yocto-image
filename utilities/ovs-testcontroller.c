@@ -187,14 +187,14 @@ main(int argc, char *argv[])
     }
     fflush(stdout);
     
-    test_data mydata;
+    struct test_data mydata;
     mydata.num1 = 14;
     mydata.num2 = 99;
     
-    printf("CVC: Writing %lu bytes to uio1\n", sizeof(test_data));
+    printf("CVC: Writing %lu bytes to uio1\n", sizeof(mydata));
     //size_t uio_one = uio_one_string ? strnlen(uio_one_string, 4095) + 1 : 0;
     //strncpy(dataport1, uio_one_string, uio_one);
-    memcpy(dataport1, &mydata, sizeof(test_data));
+    memcpy(dataport1, &mydata, sizeof(mydata));
     printf("CVC: Reading uio0\n");
     for (char *chr = dataport; *chr != 0; chr ++) {
         putchar(*chr);
