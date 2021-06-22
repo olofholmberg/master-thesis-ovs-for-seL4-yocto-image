@@ -61,6 +61,11 @@ VLOG_DEFINE_THIS_MODULE(controller);
 #define MAX_SWITCHES 16
 #define MAX_LISTENERS 16
 
+struct test_data {
+    int num1;
+    int num2;
+};
+
 struct switch_ {
     struct lswitch *lswitch;
 };
@@ -181,9 +186,15 @@ main(int argc, char *argv[])
         putchar(*chr);
     }
     fflush(stdout);
+    
+    test_data mydata;
+    mydata.num1 = 14;
+    mydata.num2 = 99;
+    
     printf("CVC: Writing uio1\n");
     size_t uio_one = uio_one_string ? strnlen(uio_one_string, 4095) + 1 : 0;
-    strncpy(dataport1, uio_one_string, uio_one);
+    //strncpy(dataport1, uio_one_string, uio_one);
+    mempcy(dataport1, &mydata, sizeof(test_data));
     printf("CVC: Reading uio0\n");
     for (char *chr = dataport; *chr != 0; chr ++) {
         putchar(*chr);
