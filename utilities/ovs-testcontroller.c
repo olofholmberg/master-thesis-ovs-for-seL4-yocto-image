@@ -194,7 +194,7 @@ main(int argc, char *argv[])
     printf("CVC: Writing %lu bytes to uio1\n", sizeof(test_data));
     //size_t uio_one = uio_one_string ? strnlen(uio_one_string, 4095) + 1 : 0;
     //strncpy(dataport1, uio_one_string, uio_one);
-    mempcy(dataport1, &mydata, sizeof(test_data));
+    memcpy(dataport1, &mydata, sizeof(test_data));
     printf("CVC: Reading uio0\n");
     for (char *chr = dataport; *chr != 0; chr ++) {
         putchar(*chr);
