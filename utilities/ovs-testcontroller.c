@@ -151,7 +151,7 @@ main(int argc, char *argv[])
     
     printf("Starting custom seL4 integrated controller...\n");
     
-    char *uio_one_string = "This is a uio1 string\n\0";
+    //char *uio_one_string = "This is a uio1 string\n\0";
     
     int dataport_length = 4096;
     
@@ -191,8 +191,8 @@ main(int argc, char *argv[])
     mydata.num1 = 14;
     mydata.num2 = 99;
     
-    printf("CVC: Writing uio1\n");
-    size_t uio_one = uio_one_string ? strnlen(uio_one_string, 4095) + 1 : 0;
+    printf("CVC: Writing %lu bytes to uio1\n", sizeof(test_data));
+    //size_t uio_one = uio_one_string ? strnlen(uio_one_string, 4095) + 1 : 0;
     //strncpy(dataport1, uio_one_string, uio_one);
     mempcy(dataport1, &mydata, sizeof(test_data));
     printf("CVC: Reading uio0\n");
