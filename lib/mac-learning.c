@@ -537,6 +537,7 @@ mac_learning_run(struct mac_learning *ml)
                || time_now() >= e->expires)) {
         COVERAGE_INC(mac_learning_expired);
         ml->total_expired++;
+        printf("Incremented total_expired");
         mac_learning_expire(ml, e);
     }
 
