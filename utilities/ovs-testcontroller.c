@@ -283,6 +283,8 @@ main(int argc, char *argv[])
             
             // Write lswitch to seL4 buffer
             memcpy(dataport1, &this->lswitch, sizeof(this->lswitch));
+            emit_event(emit);
+            block_event(fd);
             
             if (lswitch_is_alive(this->lswitch)) {
                 i++;
