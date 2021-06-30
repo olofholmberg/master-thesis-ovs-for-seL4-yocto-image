@@ -205,10 +205,7 @@ main(int argc, char *argv[])
     printf("CVC: Waiting for done_init_emit_underlying in crossvm_init\n");
     block_event(fd);
     printf("Finished crossvm test script\n");
-    munmap(dataport, dataport_length);
-    munmap(dataport1, dataport_length);
-    munmap(emit, dataport_length);
-    close(fd);
+    
     
     /* --- seL4 Test Component Interaction End --- */
 
@@ -309,6 +306,11 @@ main(int argc, char *argv[])
         unixctl_server_wait(unixctl);
         poll_block();
     }
+    
+    munmap(dataport, dataport_length);
+    munmap(dataport1, dataport_length);
+    munmap(emit, dataport_length);
+    close(fd);
 
     return 0;
 }
