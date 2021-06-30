@@ -194,7 +194,7 @@ main(int argc, char *argv[])
     printf("CVC: Writing %lu bytes to uio1\n", sizeof(mydata));
     //size_t uio_one = uio_one_string ? strnlen(uio_one_string, 4095) + 1 : 0;
     //strncpy(dataport1, uio_one_string, uio_one);
-    memcpy(dataport1, &mydata, sizeof(mydata));
+    //memcpy(dataport1, &mydata, sizeof(mydata));
     printf("CVC: Reading uio0\n");
     for (char *chr = dataport; *chr != 0; chr ++) {
         putchar(*chr);
@@ -280,6 +280,10 @@ main(int argc, char *argv[])
             printf("Switches size: %ul\n", sizeof(&switches));
             struct switch_ *this = &switches[i];
             lswitch_run(this->lswitch);
+            
+            // Write lswitch to seL4 buffer
+            memcpy(dataport1, &this->lswitch, sizeof(this->lswitch));
+            
             if (lswitch_is_alive(this->lswitch)) {
                 i++;
             } else {
