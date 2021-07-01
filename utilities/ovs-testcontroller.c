@@ -182,7 +182,6 @@ main(int argc, char *argv[])
 
         /* Do some switching work.  . */
         for (i = 0; i < n_switches; ) {
-            printf("Switches size: %ul\n", sizeof(&switches));
             struct switch_ *this = &switches[i];
             lswitch_run(this->lswitch);
 

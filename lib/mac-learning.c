@@ -541,7 +541,6 @@ mac_learning_run(struct mac_learning *ml)
     }
 
     need_revalidate = ml->need_revalidate;
-    printf("Revalidated ml");
     ml->need_revalidate = false;
     return need_revalidate;
 }
