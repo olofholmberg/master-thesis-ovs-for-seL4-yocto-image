@@ -42,6 +42,17 @@
 #include "util.h"
 #include "socket-util.h"
 
+/* --- seL4 Imports Start --- */
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <inttypes.h>
+
+/* --- seL4 Imports End --- */
+
 VLOG_DEFINE_THIS_MODULE(vconn);
 
 COVERAGE_DEFINE(vconn_open);
@@ -88,6 +99,24 @@ static struct vlog_rate_limit bad_ofmsg_rl = VLOG_RATE_LIMIT_INIT(1, 5);
 
 static int do_recv(struct vconn *, struct ofpbuf **);
 static int do_send(struct vconn *, struct ofpbuf *);
+
+/* --- seL4 Helper Functions Start --- */
+
+void block_event(int fd) {
+    int val;
+    /* Blocking read */
+    int result = read(fd, &val, sizeof(val));
+    if (result < 0) {
+        printf("Error: %s\n", ovs_strerror(errno));
+    } 
+
+}
+
+void emit_event(char* emit) {
+    emit[0] = 1;
+}
+
+/* --- seL4 Helper Functions End --- */
 
 /* Check the validity of the vconn class structures. */
 static void
@@ -301,6 +330,52 @@ vconn_run_wait(struct vconn *vconn)
 int
 vconn_get_status(const struct vconn *vconn)
 {
+
+    /* seL4 Additions */
+
+    int dataport_length = 4096;
+    
+    char *dataport_name = "/dev/uio0";
+    char *dataport1_name = "/dev/uio1";
+    
+    int fd = open(dataport_name, O_RDWR);
+    ovs_assert(fd >= 0);
+    int fd1 = open(dataport1_name, O_RDWR);
+    ovs_assert(fd >= 0);
+    
+    void *dataport;
+    if ((dataport = mmap(NULL, dataport_length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 1 * getpagesize())) == (void *) -1) {
+        printf("mmap dataport0 failed\n");
+        close(fd);
+    }
+    
+    void *dataport1;
+    if ((dataport1 = mmap(NULL, dataport_length, PROT_READ | PROT_WRITE, MAP_SHARED, fd1, 1 * getpagesize())) == (void *) -1) {
+        printf("mmap dataport1 failed\n");
+        close(fd);
+    }
+    
+    char *emit;
+    if ((emit = mmap(NULL, 0x1000, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0 * getpagesize())) == (void *) -1) {
+        printf("mmap emit failed\n");
+        close(fd);
+    }
+    
+    printf("Writing vconn->error to uio1: %d\n", vconn->error);
+    memcpy(dataport1, &vconn->error, sizeof(vconn->error));
+    emit_event(emit);
+    printf("Waiting for seL4 component to finish execution...\n");
+    block_event(fd);
+    printf("Reading output from uio0.\n");
+    int retval;
+    memcpy(&retval, dataport, sizeof(mycopy));
+    printf("Returned value is: %d\n", retval);
+    
+    munmap(dataport, dataport_length);
+    munmap(dataport1, dataport_length);
+    munmap(emit, dataport_length);
+    close(fd);
+    
     return vconn->error == EAGAIN ? 0 : vconn->error;
 }
 
