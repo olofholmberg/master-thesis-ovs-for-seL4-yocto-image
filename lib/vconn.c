@@ -368,7 +368,7 @@ vconn_get_status(const struct vconn *vconn)
     block_event(fd);
     printf("Reading output from uio0.\n");
     int retval;
-    memcpy(&retval, dataport, sizeof(mycopy));
+    memcpy(&retval, dataport, sizeof(retval));
     printf("Returned value is: %d\n", retval);
     
     munmap(dataport, dataport_length);
