@@ -330,7 +330,49 @@ vconn_run_wait(struct vconn *vconn)
 int
 vconn_get_status(const struct vconn *vconn)
 {   
-    return vconn->error == EAGAIN ? 0 : vconn->error;
+
+    /* seL4 Additions */
+
+    int dataport_length = 4096;
+
+    char *dataport_name = "/dev/uio0";
+    char *dataport1_name = "/dev/uio1";
+
+    int fd = open(dataport_name, O_RDWR);
+    ovs_assert(fd >= 0);
+    int fd1 = open(dataport1_name, O_RDWR);
+    ovs_assert(fd >= 0);
+
+    void *dataport;
+    if ((dataport = mmap(NULL, dataport_length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 1 * getpagesize())) == (void *) -1) {
+        printf("mmap dataport0 failed\n");
+        close(fd);
+    }
+
+    void *dataport1;
+    if ((dataport1 = mmap(NULL, dataport_length, PROT_READ | PROT_WRITE, MAP_SHARED, fd1, 1 * getpagesize())) == (void *) -1) {
+        printf("mmap dataport1 failed\n");
+        close(fd);
+    }
+
+    char *emit;
+    if ((emit = mmap(NULL, 0x1000, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0 * getpagesize())) == (void *) -1) {
+        printf("mmap emit failed\n");
+        close(fd);
+    }
+
+    memcpy(dataport1, &vconn->error, sizeof(vconn->error));
+    emit_event(emit);
+    block_event(fd);
+    int retval;
+    memcpy(&retval, dataport, sizeof(retval));
+
+    munmap(dataport, dataport_length);
+    munmap(dataport1, dataport_length);
+    munmap(emit, dataport_length);
+    close(fd);
+
+    return retval;
 }
 
 int
