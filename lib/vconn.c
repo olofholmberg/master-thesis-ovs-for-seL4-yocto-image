@@ -382,7 +382,7 @@ vconn_get_status(const struct vconn *vconn)
     clock_gettime(CLOCK_MONOTONIC, &ts4);
     
     double time_setup = (double) (ts2.tv_nsec - ts1.tv_nsec) / 1000000000 + (double) (ts2.tv_sec - ts1.tv_sec);
-    double time_teardown = (double) (ts4.tv_nsec - ts3.tv_nsec) / 1000000000 + (double) (ts4.tv_sec - ts3.tv_sec)
+    double time_teardown = (double) (ts4.tv_nsec - ts3.tv_nsec) / 1000000000 + (double) (ts4.tv_sec - ts3.tv_sec);
     
     printf("Time total: %f seconds\n", time_setup + time_teardown);
 
