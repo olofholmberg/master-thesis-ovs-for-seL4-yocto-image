@@ -630,7 +630,13 @@ rconn_run(struct rconn *rc)
 
         vconn_run(rc->vconn);
 
+        struct timespec ts1, ts2;
+        clock_gettime(CLOCK_MONOTONIC, &ts1);
+
         error = vconn_get_status(rc->vconn);
+        
+        clock_gettime(CLOCK_MONOTONIC, &ts2);
+        printf("of total time: %f seconds\n", (double) (ts2.tv_nsec - ts1.tv_nsec) / 1000000000 + (double) (ts2.tv_sec - ts1.tv_sec));
         
         if (error) {
             report_error(rc, error);

@@ -333,6 +333,9 @@ vconn_get_status(const struct vconn *vconn)
 
     /* seL4 Additions */
 
+    struct timespec ts1, ts2, ts3, ts4;
+    clock_gettime(CLOCK_MONOTONIC, &ts1);
+
     int dataport_length = 4096;
 
     char *dataport_name = "/dev/uio0";
@@ -352,7 +355,7 @@ vconn_get_status(const struct vconn *vconn)
     void *dataport1;
     if ((dataport1 = mmap(NULL, dataport_length, PROT_READ | PROT_WRITE, MAP_SHARED, fd1, 1 * getpagesize())) == (void *) -1) {
         printf("mmap dataport1 failed\n");
-        close(fd);
+        close(fd1);
     }
 
     char *emit;
@@ -361,16 +364,28 @@ vconn_get_status(const struct vconn *vconn)
         close(fd);
     }
 
+    clock_gettime(CLOCK_MONOTONIC, &ts2);
+
     memcpy(dataport1, &vconn->error, sizeof(vconn->error));
     emit_event(emit);
     block_event(fd);
     int retval;
     memcpy(&retval, dataport, sizeof(retval));
 
+    clock_gettime(CLOCK_MONOTONIC, &ts3);
+
     munmap(dataport, dataport_length);
     munmap(dataport1, dataport_length);
     munmap(emit, dataport_length);
     close(fd);
+    close(fd1);
+    
+    clock_gettime(CLOCK_MONOTONIC, &ts4);
+
+    double time_setup = (double) (ts2.tv_nsec - ts1.tv_nsec) / 1000000000 + (double) (ts2.tv_sec - ts1.tv_sec);
+    double time_teardown = (double) (ts4.tv_nsec - ts3.tv_nsec) / 1000000000 + (double) (ts4.tv_sec - ts3.tv_sec);
+
+    printf("Time setup & teardown: %f seconds ", time_setup + time_teardown);
 
     return retval;
 }
