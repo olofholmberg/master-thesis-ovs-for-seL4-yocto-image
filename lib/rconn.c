@@ -630,7 +630,6 @@ rconn_run(struct rconn *rc)
 
         vconn_run(rc->vconn);
 
-        /* Performance measurment of vconn_get_status */
         struct timespec ts1, ts2;
         clock_gettime(CLOCK_MONOTONIC, &ts1);
 

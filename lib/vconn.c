@@ -329,7 +329,7 @@ vconn_run_wait(struct vconn *vconn)
  * EOF if the connection was closed in a normal way. */
 int
 vconn_get_status(const struct vconn *vconn)
-{   
+{
     return vconn->error == EAGAIN ? 0 : vconn->error;
 }
 
