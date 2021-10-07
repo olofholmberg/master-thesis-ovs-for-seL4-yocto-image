@@ -331,6 +331,9 @@ int
 vconn_get_status(const struct vconn *vconn)
 {
     /* External Component Communication Additions */
+    
+    struct timespec ts1, ts2, ts3, ts4;
+    clock_gettime(CLOCK_MONOTONIC, &ts1);
 
     int dataport_length = 4096;
 
@@ -359,6 +362,8 @@ vconn_get_status(const struct vconn *vconn)
         printf("mmap emit failed\n");
         close(fd);
     }
+    
+    clock_gettime(CLOCK_MONOTONIC, &ts2);
 
     memcpy(dataport1, &vconn->error, sizeof(vconn->error));
     emit_event(emit);
@@ -366,10 +371,19 @@ vconn_get_status(const struct vconn *vconn)
     int retval;
     memcpy(&retval, dataport, sizeof(retval));
 
+    clock_gettime(CLOCK_MONOTONIC, &ts3);
+
     munmap(dataport, dataport_length);
     munmap(dataport1, dataport_length);
     munmap(emit, dataport_length);
     close(fd);
+    
+    clock_gettime(CLOCK_MONOTONIC, &ts4);
+    
+    double time_setup = (double) (ts2.tv_nsec - ts1.tv_nsec) / 1000000000 + (double) (ts2.tv_sec - ts1.tv_sec);
+    double time_teardown = (double) (ts4.tv_nsec - ts3.tv_nsec) / 1000000000 + (double) (ts4.tv_sec - ts3.tv_sec)
+
+    printf("%f ", time_setup + time_teardown);
 
     return retval;
 }
