@@ -330,9 +330,7 @@ vconn_run_wait(struct vconn *vconn)
 int
 vconn_get_status(const struct vconn *vconn)
 {
-    /* External Component Communication Additions */
-
-    printf("Size of int data type: %d\n", sizeof(int));
+    /* External Component Communication Additions - added by Olof Holmberg */
 
     int dataport_length = 4096;
 
